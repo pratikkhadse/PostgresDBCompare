@@ -12,6 +12,14 @@
             float: left;
             width: 50%;
         }
+
+        .dot {
+            height: 10px;
+            width:10px;
+            background-color: rgb(37, 170, 32);
+            border-radius: 50%;
+            display: inline-block;
+        }
     </style>
 </head>
 
@@ -29,6 +37,11 @@
                         <div>
                             <form name="{{'database' + $index}}">
                                 <table>
+                                    <tr>
+                                        <th>
+                                            <label>Database {{$index + 1}} <span class="dot" ng-show="responseDatabase['database' + $index].table" title="Connected"></span></label>
+                                        </th>
+                                    </tr>
                                     <tr>
                                         <td>Connection Name</td>
                                         <td><input type="text" maxlength="100"
@@ -80,9 +93,9 @@
                     <tr>
                         <td ng-repeat="form in [] | range:databaseCount">
                             <label>Table - {{responseDatabase['database' + $index].table.length}}</label><br>
-                            
+
                             <label>Function - {{responseDatabase['database' + $index].function.length}}</label><br>
-                            
+
                         </td>
                     </tr>
                     <!-- <th>Tables</th>
@@ -205,7 +218,11 @@
                             $scope.connName.push($scope.connections[database].connName);
                         $scope.responseDatabase[database] = res.data.data;
                         console.log($scope.responseDatabase[database]);
+                    } else {
+                        alert(res.data.msg);
                     }
+                }, (err)=>{
+                    alert('server is busy')
                 })
             }
 
@@ -215,7 +232,10 @@
                     "url": "api/checkconnection",
                     "data": $scope.connections[database]
                 }).then((res) => {
-                    console.log(res);
+                    // console.log(res);
+                    alert(res.data.msg);
+                }, (err)=>{
+                    alert('server is busy')
                 })
             }
 
@@ -231,7 +251,11 @@
                     console.log(res);
                     if (res.data.status) {
                         $scope.compareData = res.data.data;
+                    } else {
+                        alert(res.data.msg);
                     }
+                }, (err)=>{
+                    alert('server is busy')
                 })
             }
 

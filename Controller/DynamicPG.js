@@ -255,7 +255,7 @@ function CompareDatabase(req, res, next) {
                                 })
                             } else {
                                 resJson.error = true;
-                                resJson.msg = `${conn2} is not present.`;
+                                resJson.msg = `connection2 is not present`;
                                 res.send(resJson);
                             }
                         }
@@ -263,7 +263,7 @@ function CompareDatabase(req, res, next) {
             })
         } else {
             resJson.error = true;
-            resJson.msg = `${conn1} is not present.`;
+            resJson.msg = `connection1 is not present`;
             res.send(resJson);
         }
 
