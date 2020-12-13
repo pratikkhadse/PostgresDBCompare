@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="angularjs/angular.min.js"></script>
+
+    <style>
+        .column {
+            float: left;
+            width: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div ng-app="databaseApp" ng-controller="databaseController" ng-cloak>
+        <div>
+            <label>Select No. of Database</label>
+            <select ng-model="databaseCount">
+                <option value="">Select no. of database</option>
+                <option ng-repeat="db in databaseList" value="{{db}}">{{db}}</option>
+            </select><br>
+            <table style="width: 100%;">
+                <tr>
+                    <td ng-repeat="form in [] | range:databaseCount">
+                        <div>
+                            <form name="{{'database' + $index}}">
+                                <table>
+                                    <tr>
+                                        <td>Connection Name</td>
+                                        <td><input type="text" maxlength="100"
+                                                ng-model="connections['database' + $index].connName"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>User</td>
+                                        <td><input type="text" maxlength="100"
+                                                ng-model="connections['database' + $index].user"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Host</td>
+                                        <td><input type="text" maxlength="100"
+                                                ng-model="connections['database' + $index].host"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Database</td>
+                                        <td><input type="text" maxlength="100"
+                                                ng-model="connections['database' + $index].database"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Password</td>
+                                        <td><input type="password" maxlength="100"
+                                                ng-model="connections['database' + $index].password"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Port</td>
+                                        <td><input type="number" min="1" max="10000000"
+                                                ng-model="connections['database' + $index].port"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><button type="submit"
+                                                ng-click="createConnection('database' + $index)">Create
+                                                Connection</button></td>
+                                        <td><button type="submit" ng-click="checkConnection('database' + $index)">Check
+                                                Connection</button></td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <table style="width: 100%;">
+                <tbody style="height: 300px;">
+                    <tr>
+                        <td ng-repeat="form in [] | range:databaseCount">
+                            <label>Table - {{responseDatabase['database' + $index].table.length}}</label><br>
+                            
+                            <label>Function - {{responseDatabase['database' + $index].function.length}}</label><br>
+                            
+                        </td>
+                    </tr>
+                    <!-- <th>Tables</th>
+                    <tr ng-repeat="table in responseDatabase['database' + $index].table">
+                        <td>{{table.tablename}}</td>
+                    </tr>
+                    <th>Functions</th>
+                    <tr ng-repeat="function in responseDatabase['database' + $index].function">
+                        <td>{{function.routine_name}}</td>
+                    </tr> -->
+                </tbody>
+            </table><br>
+            <div>
+                <label>Compare Database</label><br>
+                <!-- <input type="text" placeholder="Enter connection name" ng-model="conn1"> -->
+                <select ng-model="conn1">
+                    <option value="">Select Connection</option>
+                    <option ng-repeat="conn in connName" value="{{conn}}">{{conn}}</option>
+                </select>
+                <!-- <input type="text" placeholder="Enter connection name" ng-model="conn2"> -->
+                <select ng-model="conn2">
+                    <option value="">Select Connection</option>
+                    <option ng-repeat="conn in connName" value="{{conn}}">{{conn}}</option>
+                </select>
+                <input type="button" ng-click="compareDatabase(conn1, conn2)" value="Compare">
+            </div>
+            <div>
+                <div class="column">
+                    <h3>{{'Database - '+ compareData.conn1.database}}</h3>
+                    <label>Table</label>
+                    <ul>
+                        <li ng-repeat="table in compareData.conn1.table">
+                            {{table.tablename}} - (missing)
+                        </li>
+                    </ul>
+                    <label>Function</label>
+                    <ul>
+                        <li ng-repeat="function in compareData.conn1.function">
+                            {{function.routine_name}} - (missing)
+                        </li>
+                    </ul>
+                </div>
+                <div class="column" style="border-left: black;">
+                    <h3>{{'Database - ' + compareData.conn2.database}}</h3>
+                    <label>Table</label>
+                    <ul>
+                        <li ng-repeat="table in compareData.conn2.table">
+                            {{table.tablename}} - (missing)
+                        </li>
+                    </ul>
+                    <label>Function</label>
+                    <ul>
+                        <li ng-repeat="function in compareData.conn2.function">
+                            {{function.routine_name}} - (missing)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const app = angular.module("databaseApp", []);
+
+        app.filter('range', function () {
+            return function (input, total) {
+                total = parseInt(total);
+                for (var i = 0; i < total; i++) {
+                    input.push(i);
+                }
+                return input;
+            };
+        });
+
+        app.controller("databaseController", function ($scope, $http) {
+            console.log('hello world')
+
+            $scope.databaseList = [1, 2, 3]
+            $scope.connName = [];
+            $scope.databaseCount = null;
+
+            $scope.responseDatabase = {};
+
+            $scope.connections = {
+                database0: {
+                    host: null,
+                    user: null,
+                    database: null,
+                    password: null,
+                    port: null,
+                    connName: null
+                },
+                database1: {
+                    host: null,
+                    user: null,
+                    database: null,
+                    password: null,
+                    port: null,
+                    connName: null
+                },
+                database2: {
+                    host: null,
+                    user: null,
+                    database: null,
+                    password: null,
+                    port: null,
+                    connName: null
+                },
+            }
+
+            $scope.createConnection = function (database) {
+                $http({
+                    "method": "POST",
+                    "url": "api/createconnection",
+                    "data": $scope.connections[database]
+                }).then((res) => {
+                    console.log(res.data);
+                    if (res.data.status) {
+                        if ($scope.connName.indexOf($scope.connections[database].connName) == -1)
+                            $scope.connName.push($scope.connections[database].connName);
+                        $scope.responseDatabase[database] = res.data.data;
+                        console.log($scope.responseDatabase[database]);
+                    }
+                })
+            }
+
+            $scope.checkConnection = function (database) {
+                $http({
+                    "method": "POST",
+                    "url": "api/checkconnection",
+                    "data": $scope.connections[database]
+                }).then((res) => {
+                    console.log(res);
+                })
+            }
+
+            $scope.compareDatabase = function (conn1, conn2) {
+                $http({
+                    "method": "POST",
+                    "url": "api/comparedatabase",
+                    "data": {
+                        conn1: conn1,
+                        conn2: conn2
+                    }
+                }).then((res) => {
+                    console.log(res);
+                    if (res.data.status) {
+                        $scope.compareData = res.data.data;
+                    }
+                })
+            }
+
+        })
+    </script>
+</body>
+
+</html>
